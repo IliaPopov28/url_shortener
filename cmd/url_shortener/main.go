@@ -1,19 +1,21 @@
 package main
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/render"
 	"log/slog"
 	"net/http"
 	"os"
 	"url-shortener/internal/config"
+	"url-shortener/internal/http_server/handlers/redirect"
 	"url-shortener/internal/http_server/handlers/url/delete"
 	"url-shortener/internal/http_server/handlers/url/save"
 	"url-shortener/internal/http_server/middleware/logger"
 	"url-shortener/internal/lib/logger/handlers/slogpretty"
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/storage/sqlite"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
 )
 
 const (
@@ -42,13 +44,27 @@ func main() {
 	router.Use(middleware.Logger)
 	router.Use(logger.New(log))
 	router.Use(middleware.Recoverer)
-	router.Use(middleware.URLFormat)
+	//router.Use(middleware.URLFormat)
 	router.Use(middleware.AllowContentType("application/json"))
 	router.Use(render.SetContentType(render.ContentTypeJSON))
 
-	router.Post("/url/save", save.New(log, storage))
-	//обработка DELETE запросов
-	router.Delete("/url/{alias}", delete.Delete(log, storage))
+	router.Route("/delete", func(r chi.Router) {
+		r.Use(middleware.BasicAuth("url_shortener", map[string]string{
+			cfg.HTTPServer.User: cfg.HTTPServer.Password,
+		}))
+
+		r.Delete("/{alias:.+}", delete.Delete(log, storage))
+	})
+
+	router.Route("/", func(r chi.Router) {
+		r.Use(middleware.BasicAuth("url_shortener", map[string]string{
+			cfg.HTTPServer.User: cfg.HTTPServer.Password,
+		}))
+
+		r.Post("/save", save.New(log, storage))
+
+		r.Get("/{alias}", redirect.Get(log, storage))
+	})
 
 	log.Info("server started", slog.String("address", cfg.Address))
 
