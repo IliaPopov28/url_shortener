@@ -2,9 +2,6 @@ package save
 
 import (
 	"errors"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
 	"io"
 	"log/slog"
 	"net/http"
@@ -12,6 +9,10 @@ import (
 	"url-shortener/internal/lib/logger/sl"
 	"url-shortener/internal/lib/random"
 	"url-shortener/internal/storage"
+
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 )
 
 type Request struct {
@@ -24,7 +25,7 @@ type Response struct {
 	Alias string `json:"alias,omitempty"`
 }
 
-const aliasLength = 6
+const AliasLength = 6
 
 //go:generate go run github.com/vektra/mockery/v2@v2 --name=URLSaver --with-expecterf
 type URLSaver interface {
@@ -74,14 +75,14 @@ func New(log *slog.Logger, urlSaver URLSaver) http.HandlerFunc {
 
 		alias := req.Alias
 		if alias == "" {
-			alias = random.NewRandomString(aliasLength)
+			alias = random.NewRandomString(AliasLength)
 		}
 
 		id, err := urlSaver.SaveURL(req.URL, alias)
 		if errors.Is(err, storage.ErrUrlExist) {
 			maxAttempts := 2
 			for attempt := 1; attempt <= maxAttempts; attempt++ {
-				alias = random.NewRandomString(aliasLength)
+				alias = random.NewRandomString(AliasLength)
 				id, err = urlSaver.SaveURL(req.URL, alias)
 
 				if err == nil {

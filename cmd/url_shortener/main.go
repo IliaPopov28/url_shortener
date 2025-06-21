@@ -41,10 +41,10 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
-	router.Use(middleware.Logger)
+	//router.Use(middleware.Logger)
 	router.Use(logger.New(log))
 	router.Use(middleware.Recoverer)
-	//router.Use(middleware.URLFormat)
+	router.Use(middleware.URLFormat)
 	router.Use(middleware.AllowContentType("application/json"))
 	router.Use(render.SetContentType(render.ContentTypeJSON))
 
