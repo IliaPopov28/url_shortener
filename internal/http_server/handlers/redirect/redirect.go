@@ -42,7 +42,7 @@ func Get(log *slog.Logger, urlGetter URLGetter) http.HandlerFunc {
 		if errors.Is(err, storage.ErrUrlNotFound) {
 			log.Info("url not found", slog.String("alias", alias))
 
-			render.Status(request, http.StatusBadRequest)
+			render.Status(request, http.StatusNotFound)
 			render.JSON(writer, request, resp.Error("url not found"))
 
 			return
