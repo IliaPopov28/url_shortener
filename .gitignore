@@ -1,6 +1,5 @@
 internal/lib/api/api.go~
 internal/lib/api/response/response.go~
-go.sum
 .idea/dataSources.xml
 .idea/modules.xml
 .idea/sqldialects.xml
