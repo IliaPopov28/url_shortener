@@ -92,6 +92,3 @@ go test ./tests
 - SQLite (через go-sqlite3)
 - [go-chi/chi](https://github.com/go-chi/chi) — роутер
 - [go-playground/validator](https://github.com/go-playground/validator) — валидация
-
-## Лицензия
-MIT 
